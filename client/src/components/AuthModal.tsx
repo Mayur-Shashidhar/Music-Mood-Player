@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Eye, EyeOff } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) return null;
 
@@ -54,6 +55,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
       setEmail("");
       setPassword("");
       setName("");
+      setShowPassword(false);
       onClose();
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -111,15 +113,24 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
 
           <div>
             <label className="block text-sm font-semibold mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="••••••••"
-              required
-              minLength={6}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="••••••••"
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <button
@@ -136,6 +147,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalP
             onClick={() => {
               setIsLogin(!isLogin);
               setError("");
+              setShowPassword(false);
             }}
             className="text-green-500 hover:text-green-400 text-sm"
           >
