@@ -205,8 +205,26 @@ export default function Player({
           {/* Main Content */}
           <div className="flex-1 flex flex-col items-center justify-center px-8 pb-8">
             {/* Album Art */}
-            <div className={`w-96 h-96 bg-gradient-to-br ${mood.gradient} rounded-2xl shadow-2xl mb-12 flex items-center justify-center ${isPlaying ? 'animate-pulse' : ''}`}>
-              <Music2 size={120} className="text-white/80" />
+            <div className={`w-96 h-96 bg-gradient-to-br ${mood.gradient} rounded-2xl shadow-2xl mb-12 overflow-hidden ${isPlaying ? 'animate-pulse' : ''}`}>
+              {currentTrack.image ? (
+                <img 
+                  src={currentTrack.image} 
+                  alt={currentTrack.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.classList.add('flex', 'items-center', 'justify-center');
+                      parent.innerHTML = '<svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white/80"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>';
+                    }
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Music2 size={120} className="text-white/80" />
+                </div>
+              )}
             </div>
 
             {/* Track Info */}
@@ -337,9 +355,27 @@ export default function Player({
           <div className="flex items-center gap-4 w-1/4 min-w-[180px]">
             <div 
               onClick={() => currentTrack && setIsExpanded(true)}
-              className={`w-14 h-14 bg-gradient-to-br ${mood.gradient} rounded flex items-center justify-center flex-shrink-0 shadow-lg ${isPlaying ? 'animate-pulse' : ''} ${currentTrack ? 'cursor-pointer hover:scale-105' : ''} transition-transform`}
+              className={`w-14 h-14 bg-gradient-to-br ${mood.gradient} rounded flex-shrink-0 shadow-lg overflow-hidden ${isPlaying ? 'animate-pulse' : ''} ${currentTrack ? 'cursor-pointer hover:scale-105' : ''} transition-transform`}
             >
-              <Music2 size={24} className="text-white" />
+              {currentTrack?.image ? (
+                <img 
+                  src={currentTrack.image} 
+                  alt={currentTrack.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      parent.classList.add('flex', 'items-center', 'justify-center');
+                      parent.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>';
+                    }
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Music2 size={24} className="text-white" />
+                </div>
+              )}
             </div>
             <div 
               onClick={() => currentTrack && setIsExpanded(true)}

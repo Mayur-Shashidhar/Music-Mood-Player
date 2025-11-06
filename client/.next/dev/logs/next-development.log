@@ -1,0 +1,11 @@
+[00:00:00.547] Server  LOG      ✓ Ready in 414ms
+[00:00:11.214] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:03:17.928] Browser LOG     ✅ Loaded 30 tracks for "Deep Focus"
+[00:03:27.772] Browser LOG     ✅ Loaded 30 tracks for "Study Session"
+[00:07:38.381] Server  LOG      ✓ Compiled in 29ms
+[00:07:50.524] Server  LOG      ✓ Compiled in 15ms
+[00:08:02.916] Server  LOG      ✓ Compiled in 14ms
+[00:08:32.015] Browser ERROR   Error playing audio: {}
+[00:08:32.015] Browser ERROR   Error playing audio: {}
+[00:08:32.015] Browser ERROR   Error playing audio: {}
+[00:10:34.870] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold

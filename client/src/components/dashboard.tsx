@@ -1059,9 +1059,24 @@ export default function Dashboard({
                     >
                       <div 
                         onClick={() => onTrackSelect(track)}
-                        className={`w-16 h-16 bg-gradient-to-br ${mood.gradient} rounded flex-shrink-0 flex items-center justify-center cursor-pointer`}
+                        className={`w-16 h-16 bg-gradient-to-br ${mood.gradient} rounded flex-shrink-0 overflow-hidden relative cursor-pointer`}
                       >
-                        <Play size={24} className="opacity-0 group-hover:opacity-100 transition-opacity fill-white" />
+                        {track.image ? (
+                          <>
+                            <img 
+                              src={track.image} 
+                              alt={track.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Play size={24} className="fill-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Play size={24} className="opacity-0 group-hover:opacity-100 transition-opacity fill-white" />
+                          </div>
+                        )}
                       </div>
                       <div 
                         onClick={() => onTrackSelect(track)}
@@ -1109,12 +1124,29 @@ export default function Dashboard({
                     >
                       <div 
                         onClick={() => onTrackSelect(track)}
-                        className={`w-full aspect-square bg-gradient-to-br ${mood.gradient} rounded-lg mb-4 shadow-lg flex items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform cursor-pointer`}
+                        className={`w-full aspect-square bg-gradient-to-br ${mood.gradient} rounded-lg mb-4 shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform cursor-pointer`}
                       >
-                        <span className="text-4xl opacity-30">🎵</span>
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Play size={40} className="fill-white" />
-                        </div>
+                        {track.image ? (
+                          <>
+                            <img 
+                              src={track.image} 
+                              alt={track.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Play size={40} className="fill-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-4xl opacity-30">🎵</span>
+                            </div>
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Play size={40} className="fill-white" />
+                            </div>
+                          </>
+                        )}
                       </div>
                       <div onClick={() => onTrackSelect(track)} className="cursor-pointer">
                         <h3 className="font-semibold mb-1 truncate">{track.title}</h3>
