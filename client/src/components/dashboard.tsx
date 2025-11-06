@@ -1023,31 +1023,30 @@ export default function Dashboard({
             <>
               {/* Curated Playlists for Current Mood */}
               <section>
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4">
                   <h2 className="text-2xl font-bold">{mood.name} Playlists</h2>
-                  <button className="text-sm font-semibold text-zinc-400 hover:text-white">Show all</button>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   {curatedPlaylists.map((playlist) => (
                     <div
                       key={playlist.id}
                       onClick={() => handlePlaylistClick(playlist)}
-                      className="bg-zinc-800/40 hover:bg-zinc-800 p-4 rounded-lg transition-all cursor-pointer group relative"
+                      className="hover:bg-white/5 p-4 rounded-lg transition-all duration-500 ease-out cursor-pointer group relative backdrop-blur-sm transform hover:scale-110 active:scale-95"
                     >
-                      <div className={`w-full aspect-square bg-gradient-to-br ${playlist.gradient} rounded-lg mb-4 shadow-lg flex items-center justify-center relative overflow-hidden`}>
+                      <div className={`w-full aspect-square bg-gradient-to-br ${playlist.gradient} rounded-lg mb-4 shadow-lg flex items-center justify-center relative overflow-hidden group-hover:shadow-xl group-hover:shadow-black/30 transition-all duration-500 ease-out`}>
                         {loadingPlaylist === playlist.id ? (
                           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
                         ) : (
                           <>
-                            <div className="text-6xl opacity-50">🎵</div>
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Play size={48} className="fill-white" />
+                            <div className="text-6xl opacity-50 group-hover:opacity-30 transition-opacity duration-300">🎵</div>
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out flex items-center justify-center">
+                              <Play size={48} className="fill-white drop-shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-500 ease-out" />
                             </div>
                           </>
                         )}
                       </div>
-                      <h3 className="font-semibold mb-1 truncate">{playlist.name}</h3>
-                      <p className="text-sm text-zinc-400 truncate">{playlist.description}</p>
+                      <h3 className="font-semibold mb-1 truncate group-hover:text-white transition-colors duration-500 ease-out">{playlist.name}</h3>
+                      <p className="text-sm text-zinc-400 truncate group-hover:text-zinc-300 transition-colors duration-500 ease-out">{playlist.description}</p>
                     </div>
                   ))}
                 </div>
@@ -1055,9 +1054,8 @@ export default function Dashboard({
 
               {/* Current Mood Tracks */}
               <section>
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4">
                   <h2 className="text-2xl font-bold">Your {mood.name} Mix</h2>
-                  <button className="text-sm font-semibold text-zinc-400 hover:text-white">See all</button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {allTracks.slice(0, 6).map((track) => {
@@ -1065,18 +1063,18 @@ export default function Dashboard({
                     return (
                     <div
                       key={track.id}
-                      className="flex items-center gap-4 bg-zinc-800/40 hover:bg-zinc-800 p-3 rounded-lg transition-all group relative"
+                      className="flex items-center gap-4 hover:bg-white/5 p-3 rounded-lg transition-all duration-500 ease-out group relative backdrop-blur-sm transform hover:scale-110 active:scale-95"
                     >
                       <div 
                         onClick={() => onTrackSelect(track)}
-                        className={`w-16 h-16 bg-gradient-to-br ${mood.gradient} rounded flex-shrink-0 overflow-hidden relative cursor-pointer`}
+                        className={`w-16 h-16 bg-gradient-to-br ${mood.gradient} rounded flex-shrink-0 overflow-hidden relative cursor-pointer group-hover:shadow-lg transition-all duration-500 ease-out`}
                       >
                         {track.image ? (
                           <>
                             <img 
                               src={track.image} 
                               alt={track.title}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition-transform duration-300"
                               onError={(e) => {
                                 console.log('Image failed to load:', track.image);
                                 // Try to show a fallback - hide the image and show the gradient background
@@ -1088,13 +1086,13 @@ export default function Dashboard({
                               }}
                               onLoad={() => console.log('Image loaded successfully:', track.image)}
                             />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Play size={24} className="fill-white" />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out flex items-center justify-center">
+                              <Play size={24} className="fill-white drop-shadow-lg" />
                             </div>
                           </>
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Play size={24} className="opacity-0 group-hover:opacity-100 transition-opacity fill-white" />
+                            <Play size={24} className="opacity-0 group-hover:opacity-100 transition-all duration-300 fill-white drop-shadow-lg" />
                           </div>
                         )}
                       </div>
@@ -1102,8 +1100,8 @@ export default function Dashboard({
                         onClick={() => onTrackSelect(track)}
                         className="flex-1 min-w-0 cursor-pointer"
                       >
-                        <h4 className="font-semibold truncate">{track.title}</h4>
-                        <p className="text-sm text-zinc-400 truncate">{track.artist}</p>
+                        <h4 className="font-semibold truncate group-hover:text-white transition-colors duration-500 ease-out">{track.title}</h4>
+                        <p className="text-sm text-zinc-400 truncate group-hover:text-zinc-300 transition-colors duration-500 ease-out">{track.artist}</p>
                       </div>
                       <button
                         onClick={(e) => {
@@ -1143,18 +1141,18 @@ export default function Dashboard({
                     return (
                     <div
                       key={track.id}
-                      className="bg-zinc-800/40 hover:bg-zinc-800 p-4 rounded-lg transition-all group relative"
+                      className="hover:bg-white/5 p-4 rounded-lg transition-all duration-500 ease-out group relative backdrop-blur-sm transform hover:scale-110 active:scale-95"
                     >
                       <div 
                         onClick={() => onTrackSelect(track)}
-                        className={`w-full aspect-square bg-gradient-to-br ${mood.gradient} rounded-lg mb-4 shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform cursor-pointer`}
+                        className={`w-full aspect-square bg-gradient-to-br ${mood.gradient} rounded-lg mb-4 shadow-lg relative overflow-hidden group-hover:shadow-xl group-hover:shadow-black/30 transition-all duration-500 ease-out cursor-pointer`}
                       >
                         {track.image ? (
                           <>
                             <img 
                               src={track.image} 
                               alt={track.title}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition-transform duration-300"
                               onError={(e) => {
                                 console.log('Recommended image failed to load:', track.image);
                                 // Hide the failed image and show the gradient background
@@ -1165,30 +1163,30 @@ export default function Dashboard({
                                 if (container) {
                                   const musicNote = document.createElement('div');
                                   musicNote.className = 'w-full h-full flex items-center justify-center';
-                                  musicNote.innerHTML = '<span class="text-4xl opacity-30">🎵</span>';
+                                  musicNote.innerHTML = '<span class="text-4xl opacity-30 group-hover:opacity-20 transition-opacity duration-300">🎵</span>';
                                   container.appendChild(musicNote);
                                 }
                               }}
                               onLoad={() => console.log('Recommended image loaded successfully:', track.image)}
                             />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Play size={40} className="fill-white" />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out flex items-center justify-center">
+                              <Play size={40} className="fill-white drop-shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-500 ease-out" />
                             </div>
                           </>
                         ) : (
                           <>
                             <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-4xl opacity-30">🎵</span>
+                              <span className="text-4xl opacity-30 group-hover:opacity-20 transition-opacity duration-300">🎵</span>
                             </div>
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Play size={40} className="fill-white" />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out flex items-center justify-center">
+                              <Play size={40} className="fill-white drop-shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-500 ease-out" />
                             </div>
                           </>
                         )}
                       </div>
                       <div onClick={() => onTrackSelect(track)} className="cursor-pointer">
-                        <h3 className="font-semibold mb-1 truncate">{track.title}</h3>
-                        <p className="text-sm text-zinc-400 truncate">{track.artist}</p>
+                        <h3 className="font-semibold mb-1 truncate group-hover:text-white transition-colors duration-500 ease-out">{track.title}</h3>
+                        <p className="text-sm text-zinc-400 truncate group-hover:text-zinc-300 transition-colors duration-500 ease-out">{track.artist}</p>
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <button
