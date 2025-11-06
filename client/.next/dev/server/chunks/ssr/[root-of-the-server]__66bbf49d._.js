@@ -2678,23 +2678,69 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "grid grid-cols-2 gap-4",
-                                                children: allTracks.slice(0, 6).map((track)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                children: allTracks.slice(0, 6).map((track)=>{
+                                                    console.log('Your Mix track:', track.title, 'has image:', !!track.image, track.image?.substring(0, 50) + '...');
+                                                    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "flex items-center gap-4 bg-zinc-800/40 hover:bg-zinc-800 p-3 rounded-lg transition-all group relative",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                 onClick: ()=>onTrackSelect(track),
-                                                                className: `w-16 h-16 bg-gradient-to-br ${mood.gradient} rounded flex-shrink-0 flex items-center justify-center cursor-pointer`,
-                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Play$3e$__["Play"], {
-                                                                    size: 24,
-                                                                    className: "opacity-0 group-hover:opacity-100 transition-opacity fill-white"
+                                                                className: `w-16 h-16 bg-gradient-to-br ${mood.gradient} rounded flex-shrink-0 overflow-hidden relative cursor-pointer`,
+                                                                children: track.image ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                    children: [
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                                                            src: track.image,
+                                                                            alt: track.title,
+                                                                            className: "w-full h-full object-cover",
+                                                                            onError: (e)=>{
+                                                                                console.log('Image failed to load:', track.image);
+                                                                                // Try to show a fallback - hide the image and show the gradient background
+                                                                                const img = e.target;
+                                                                                img.style.display = 'none';
+                                                                                // Show play button immediately since image failed
+                                                                                const playBtn = img.parentElement?.querySelector('.transition-opacity');
+                                                                                if (playBtn) playBtn.style.opacity = '0.6';
+                                                                            },
+                                                                            onLoad: ()=>console.log('Image loaded successfully:', track.image)
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                            lineNumber: 1068,
+                                                                            columnNumber: 29
+                                                                        }, this),
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                            className: "absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center",
+                                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Play$3e$__["Play"], {
+                                                                                size: 24,
+                                                                                className: "fill-white"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                                lineNumber: 1084,
+                                                                                columnNumber: 31
+                                                                            }, this)
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                            lineNumber: 1083,
+                                                                            columnNumber: 29
+                                                                        }, this)
+                                                                    ]
+                                                                }, void 0, true) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                    className: "w-full h-full flex items-center justify-center",
+                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Play$3e$__["Play"], {
+                                                                        size: 24,
+                                                                        className: "opacity-0 group-hover:opacity-100 transition-opacity fill-white"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                        lineNumber: 1089,
+                                                                        columnNumber: 29
+                                                                    }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                    lineNumber: 1064,
-                                                                    columnNumber: 25
+                                                                    lineNumber: 1088,
+                                                                    columnNumber: 27
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                lineNumber: 1060,
+                                                                lineNumber: 1062,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2706,7 +2752,7 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                                         children: track.title
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                        lineNumber: 1070,
+                                                                        lineNumber: 1097,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2714,13 +2760,13 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                                         children: track.artist
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                        lineNumber: 1071,
+                                                                        lineNumber: 1098,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                lineNumber: 1066,
+                                                                lineNumber: 1093,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2734,12 +2780,12 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                                     className: `transition-colors ${likedSongs.has(track.id) ? 'fill-green-500 text-green-500' : 'text-zinc-400 hover:text-white'}`
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                    lineNumber: 1080,
+                                                                    lineNumber: 1107,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                lineNumber: 1073,
+                                                                lineNumber: 1100,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2751,15 +2797,16 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                                 children: "+"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                lineNumber: 1085,
+                                                                lineNumber: 1112,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, track.id, true, {
                                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                                        lineNumber: 1056,
+                                                        lineNumber: 1058,
                                                         columnNumber: 21
-                                                    }, this))
+                                                    }, this);
+                                                })
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/components/dashboard.tsx",
                                                 lineNumber: 1054,
@@ -2780,50 +2827,103 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                     children: "Recommended for you"
                                                 }, void 0, false, {
                                                     fileName: "[project]/client/src/components/dashboard.tsx",
-                                                    lineNumber: 1102,
+                                                    lineNumber: 1130,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                lineNumber: 1101,
+                                                lineNumber: 1129,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                 className: "grid grid-cols-4 gap-4",
-                                                children: allTracks.slice(6, 14).map((track, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                children: allTracks.slice(6, 14).map((track, i)=>{
+                                                    console.log('Recommended track:', track.title, 'has image:', !!track.image, track.image?.substring(0, 50) + '...');
+                                                    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         className: "bg-zinc-800/40 hover:bg-zinc-800 p-4 rounded-lg transition-all group relative",
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                 onClick: ()=>onTrackSelect(track),
-                                                                className: `w-full aspect-square bg-gradient-to-br ${mood.gradient} rounded-lg mb-4 shadow-lg flex items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform cursor-pointer`,
-                                                                children: [
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                        className: "text-4xl opacity-30",
-                                                                        children: "🎵"
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                        lineNumber: 1114,
-                                                                        columnNumber: 25
-                                                                    }, this),
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                        className: "absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center",
-                                                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Play$3e$__["Play"], {
-                                                                            size: 40,
-                                                                            className: "fill-white"
+                                                                className: `w-full aspect-square bg-gradient-to-br ${mood.gradient} rounded-lg mb-4 shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform cursor-pointer`,
+                                                                children: track.image ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                    children: [
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                                                            src: track.image,
+                                                                            alt: track.title,
+                                                                            className: "w-full h-full object-cover",
+                                                                            onError: (e)=>{
+                                                                                console.log('Recommended image failed to load:', track.image);
+                                                                                // Hide the failed image and show the gradient background
+                                                                                const img = e.target;
+                                                                                img.style.display = 'none';
+                                                                                // Show music note icon when image fails
+                                                                                const container = img.parentElement;
+                                                                                if (container) {
+                                                                                    const musicNote = document.createElement('div');
+                                                                                    musicNote.className = 'w-full h-full flex items-center justify-center';
+                                                                                    musicNote.innerHTML = '<span class="text-4xl opacity-30">🎵</span>';
+                                                                                    container.appendChild(musicNote);
+                                                                                }
+                                                                            },
+                                                                            onLoad: ()=>console.log('Recommended image loaded successfully:', track.image)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                            lineNumber: 1116,
-                                                                            columnNumber: 27
+                                                                            lineNumber: 1146,
+                                                                            columnNumber: 29
+                                                                        }, this),
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                            className: "absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center",
+                                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Play$3e$__["Play"], {
+                                                                                size: 40,
+                                                                                className: "fill-white"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                                lineNumber: 1167,
+                                                                                columnNumber: 31
+                                                                            }, this)
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                            lineNumber: 1166,
+                                                                            columnNumber: 29
                                                                         }, this)
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                        lineNumber: 1115,
-                                                                        columnNumber: 25
-                                                                    }, this)
-                                                                ]
-                                                            }, void 0, true, {
+                                                                    ]
+                                                                }, void 0, true) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                    children: [
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                            className: "w-full h-full flex items-center justify-center",
+                                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                className: "text-4xl opacity-30",
+                                                                                children: "🎵"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                                lineNumber: 1173,
+                                                                                columnNumber: 31
+                                                                            }, this)
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                            lineNumber: 1172,
+                                                                            columnNumber: 29
+                                                                        }, this),
+                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                            className: "absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center",
+                                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$play$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Play$3e$__["Play"], {
+                                                                                size: 40,
+                                                                                className: "fill-white"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                                lineNumber: 1176,
+                                                                                columnNumber: 31
+                                                                            }, this)
+                                                                        }, void 0, false, {
+                                                                            fileName: "[project]/client/src/components/dashboard.tsx",
+                                                                            lineNumber: 1175,
+                                                                            columnNumber: 29
+                                                                        }, this)
+                                                                    ]
+                                                                }, void 0, true)
+                                                            }, void 0, false, {
                                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                lineNumber: 1110,
+                                                                lineNumber: 1140,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2835,7 +2935,7 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                                         children: track.title
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                        lineNumber: 1120,
+                                                                        lineNumber: 1182,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2843,13 +2943,13 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                                         children: track.artist
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                        lineNumber: 1121,
+                                                                        lineNumber: 1183,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                lineNumber: 1119,
+                                                                lineNumber: 1181,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2866,12 +2966,12 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                                             className: `transition-colors ${likedSongs.has(track.id) ? 'fill-green-500 text-green-500' : 'text-zinc-400 hover:text-white'}`
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                            lineNumber: 1131,
+                                                                            lineNumber: 1193,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                        lineNumber: 1124,
+                                                                        lineNumber: 1186,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2883,30 +2983,31 @@ function Dashboard({ mood, onTrackSelect, onPlayPlaylist, allTracks, likedSongs,
                                                                         children: "+"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                        lineNumber: 1136,
+                                                                        lineNumber: 1198,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                                lineNumber: 1123,
+                                                                lineNumber: 1185,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, track.id, true, {
                                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                                        lineNumber: 1106,
+                                                        lineNumber: 1136,
                                                         columnNumber: 21
-                                                    }, this))
+                                                    }, this);
+                                                })
                                             }, void 0, false, {
                                                 fileName: "[project]/client/src/components/dashboard.tsx",
-                                                lineNumber: 1104,
+                                                lineNumber: 1132,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/client/src/components/dashboard.tsx",
-                                        lineNumber: 1100,
+                                        lineNumber: 1128,
                                         columnNumber: 15
                                     }, this)
                                 ]
@@ -4521,6 +4622,10 @@ function HomePage() {
         const loadTracks = async ()=>{
             setIsLoading(true);
             const tracks = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$services$2f$musicService$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["fetchTracksByMood"])(mood, 30);
+            console.log('Loaded tracks for mood:', mood, tracks.slice(0, 3).map((t)=>({
+                    title: t.title,
+                    image: t.image
+                })));
             setAllTracks(tracks);
             setOriginalTracksOrder(tracks);
             setPlaybackQueue(tracks);
@@ -4606,7 +4711,7 @@ function HomePage() {
                 onAuthSuccess: handleAuthSuccess
             }, void 0, false, {
                 fileName: "[project]/client/src/app/page.tsx",
-                lineNumber: 284,
+                lineNumber: 285,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4625,7 +4730,7 @@ function HomePage() {
                         onLogout: handleLogout
                     }, void 0, false, {
                         fileName: "[project]/client/src/app/page.tsx",
-                        lineNumber: 292,
+                        lineNumber: 293,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4637,7 +4742,7 @@ function HomePage() {
                                 moods: moods
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/page.tsx",
-                                lineNumber: 307,
+                                lineNumber: 308,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$client$2f$src$2f$components$2f$Queue$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -4648,19 +4753,19 @@ function HomePage() {
                                 isShuffled: isShuffled
                             }, void 0, false, {
                                 fileName: "[project]/client/src/app/page.tsx",
-                                lineNumber: 308,
+                                lineNumber: 309,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/client/src/app/page.tsx",
-                        lineNumber: 306,
+                        lineNumber: 307,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/client/src/app/page.tsx",
-                lineNumber: 290,
+                lineNumber: 291,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$client$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4680,18 +4785,18 @@ function HomePage() {
                     onToggleLike: ()=>currentTrack && toggleLike(currentTrack.id)
                 }, void 0, false, {
                     fileName: "[project]/client/src/app/page.tsx",
-                    lineNumber: 320,
+                    lineNumber: 321,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/client/src/app/page.tsx",
-                lineNumber: 319,
+                lineNumber: 320,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/client/src/app/page.tsx",
-        lineNumber: 282,
+        lineNumber: 283,
         columnNumber: 5
     }, this);
 }

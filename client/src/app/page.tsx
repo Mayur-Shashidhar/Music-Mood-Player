@@ -200,6 +200,7 @@ export default function HomePage() {
     const loadTracks = async () => {
       setIsLoading(true);
       const tracks = await fetchTracksByMood(mood, 30);
+      console.log('Loaded tracks for mood:', mood, tracks.slice(0, 3).map(t => ({ title: t.title, image: t.image })));
       setAllTracks(tracks);
       setOriginalTracksOrder(tracks);
       setPlaybackQueue(tracks);

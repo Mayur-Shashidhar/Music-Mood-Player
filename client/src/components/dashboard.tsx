@@ -1052,7 +1052,9 @@ export default function Dashboard({
                   <button className="text-sm font-semibold text-zinc-400 hover:text-white">See all</button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  {allTracks.slice(0, 6).map((track) => (
+                  {allTracks.slice(0, 6).map((track) => {
+                    console.log('Your Mix track:', track.title, 'has image:', !!track.image, track.image?.substring(0, 50) + '...');
+                    return (
                     <div
                       key={track.id}
                       className="flex items-center gap-4 bg-zinc-800/40 hover:bg-zinc-800 p-3 rounded-lg transition-all group relative"
@@ -1067,6 +1069,16 @@ export default function Dashboard({
                               src={track.image} 
                               alt={track.title}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.log('Image failed to load:', track.image);
+                                // Try to show a fallback - hide the image and show the gradient background
+                                const img = e.target as HTMLImageElement;
+                                img.style.display = 'none';
+                                // Show play button immediately since image failed
+                                const playBtn = img.parentElement?.querySelector('.transition-opacity') as HTMLElement;
+                                if (playBtn) playBtn.style.opacity = '0.6';
+                              }}
+                              onLoad={() => console.log('Image loaded successfully:', track.image)}
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <Play size={24} className="fill-white" />
@@ -1107,7 +1119,8 @@ export default function Dashboard({
                         +
                       </button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
 
@@ -1117,7 +1130,9 @@ export default function Dashboard({
                   <h2 className="text-2xl font-bold">Recommended for you</h2>
                 </div>
                 <div className="grid grid-cols-4 gap-4">
-                  {allTracks.slice(6, 14).map((track, i) => (
+                  {allTracks.slice(6, 14).map((track, i) => {
+                    console.log('Recommended track:', track.title, 'has image:', !!track.image, track.image?.substring(0, 50) + '...');
+                    return (
                     <div
                       key={track.id}
                       className="bg-zinc-800/40 hover:bg-zinc-800 p-4 rounded-lg transition-all group relative"
@@ -1132,6 +1147,21 @@ export default function Dashboard({
                               src={track.image} 
                               alt={track.title}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.log('Recommended image failed to load:', track.image);
+                                // Hide the failed image and show the gradient background
+                                const img = e.target as HTMLImageElement;
+                                img.style.display = 'none';
+                                // Show music note icon when image fails
+                                const container = img.parentElement;
+                                if (container) {
+                                  const musicNote = document.createElement('div');
+                                  musicNote.className = 'w-full h-full flex items-center justify-center';
+                                  musicNote.innerHTML = '<span class="text-4xl opacity-30">🎵</span>';
+                                  container.appendChild(musicNote);
+                                }
+                              }}
+                              onLoad={() => console.log('Recommended image loaded successfully:', track.image)}
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <Play size={40} className="fill-white" />
@@ -1176,7 +1206,8 @@ export default function Dashboard({
                         </button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             </>
