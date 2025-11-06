@@ -1,0 +1,14 @@
+{
+    "git.ignoreLimitWarning": true,
+    "typescript.tsdk": "client/node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "eslint.workingDirectories": [
+        "./client",
+        "./server"
+    ],
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/.next": true
+    }
+}

@@ -1,0 +1,1156 @@
+// components/Dashboard.tsx
+"use client";
+import { Search, Home, Clock, Play, Plus, X, Check, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Track } from "@/data/tracks";
+import { searchTracks } from "@/services/musicService";
+import { 
+  getUserPlaylists,
+  createPlaylist as apiCreatePlaylist,
+  deletePlaylist as apiDeletePlaylist,
+  addTrackToPlaylist as apiAddTrackToPlaylist,
+  removeTrackFromPlaylist as apiRemoveTrackFromPlaylist,
+} from "@/services/authService";
+
+interface Mood {
+  name: string;
+  gradient: string;
+  bgColor: string;
+  description: string;
+}
+
+interface UserPlaylist {
+  id: number;
+  name: string;
+  tracks: Track[];
+  createdAt: Date;
+}
+
+export default function Dashboard({ 
+  mood, 
+  onTrackSelect, 
+  onPlayPlaylist, 
+  allTracks, 
+  likedSongs,
+  likedSongsTracks,
+  onToggleLike,
+  user,
+  onShowAuth,
+  onLogout,
+}: { 
+  mood: Mood; 
+  onTrackSelect: (track: Track) => void;
+  onPlayPlaylist: (tracks: Track[]) => void;
+  allTracks: Track[];
+  likedSongs: Set<string>;
+  likedSongsTracks: Track[];
+  onToggleLike: (trackId: string) => void;
+  user: any;
+  onShowAuth: () => void;
+  onLogout: () => void;
+}) {
+  const [activeView, setActiveView] = useState<"home" | "search" | "playlist" | "user-playlist" | "liked">("home");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Track[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [loadingPlaylist, setLoadingPlaylist] = useState<number | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<{
+    name: string;
+    description: string;
+    gradient: string;
+    tracks: Track[];
+  } | null>(null);
+  
+  // User playlist states
+  const [userPlaylists, setUserPlaylists] = useState<UserPlaylist[]>([]);
+  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [selectedUserPlaylist, setSelectedUserPlaylist] = useState<UserPlaylist | null>(null);
+  const [showAddToPlaylist, setShowAddToPlaylist] = useState<Track | null>(null);
+
+  // Load user playlists when user logs in
+  useEffect(() => {
+    const loadUserPlaylists = async () => {
+      if (user) {
+        try {
+          const playlists = await getUserPlaylists();
+          setUserPlaylists(playlists.map((p: any) => ({
+            ...p,
+            id: Number(p.id),
+            createdAt: new Date(p.createdAt),
+          })));
+        } catch (error) {
+          console.error('Error loading playlists:', error);
+        }
+      } else {
+        setUserPlaylists([]);
+      }
+    };
+    loadUserPlaylists();
+  }, [user]);
+
+  // Debounced search
+  useEffect(() => {
+    if (searchQuery.trim().length === 0) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timeoutId = setTimeout(async () => {
+      const results = await searchTracks(searchQuery, 20);
+      setSearchResults(results);
+      setIsSearching(false);
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Switch to search view when user types
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      setActiveView("search");
+    }
+  }, [searchQuery]);
+
+  // Curated playlists based on mood
+  const getCuratedPlaylists = (currentMood: string) => {
+    const playlistsByMood: { [key: string]: any[] } = {
+      'Happy': [
+        { id: 1, name: "Happy Vibes Mix", description: "Upbeat tracks to brighten your day", gradient: "from-yellow-300 via-yellow-400 to-amber-500" },
+        { id: 2, name: "Energy Boost", description: "High energy music for motivation", gradient: "from-orange-400 via-yellow-400 to-amber-400" },
+        { id: 3, name: "Feel Good Playlist", description: "Songs that make you smile", gradient: "from-amber-400 via-yellow-300 to-yellow-500" },
+        { id: 4, name: "Sunshine Mix", description: "Bright and cheerful tunes", gradient: "from-yellow-400 via-amber-300 to-orange-400" },
+        { id: 5, name: "Dance Party", description: "Get moving with these beats", gradient: "from-yellow-500 via-orange-400 to-red-400" },
+        { id: 6, name: "Good Morning", description: "Start your day right", gradient: "from-amber-300 via-yellow-400 to-yellow-500" },
+      ],
+      'Sad': [
+        { id: 1, name: "Melancholic Moments", description: "Embrace your feelings", gradient: "from-blue-900 via-blue-700 to-blue-500" },
+        { id: 2, name: "Rainy Day Blues", description: "Perfect for introspective moods", gradient: "from-indigo-900 via-blue-800 to-blue-600" },
+        { id: 3, name: "Emotional Journey", description: "Deep and meaningful tracks", gradient: "from-blue-800 via-blue-600 to-indigo-500" },
+        { id: 4, name: "Quiet Reflection", description: "Time for contemplation", gradient: "from-blue-700 via-indigo-600 to-purple-500" },
+        { id: 5, name: "Heartfelt Ballads", description: "Songs that touch the soul", gradient: "from-blue-900 via-purple-800 to-indigo-700" },
+        { id: 6, name: "Midnight Thoughts", description: "Late night listening", gradient: "from-indigo-900 via-blue-900 to-slate-800" },
+      ],
+      'Chill': [
+        { id: 1, name: "Chill Lounge", description: "Relaxed vibes for unwinding", gradient: "from-teal-600 via-green-600 to-emerald-700" },
+        { id: 2, name: "Ambient Dreams", description: "Atmospheric soundscapes", gradient: "from-emerald-700 via-teal-600 to-cyan-600" },
+        { id: 3, name: "Lazy Sunday", description: "Take it easy", gradient: "from-green-600 via-emerald-600 to-teal-600" },
+        { id: 4, name: "Coffee Shop Beats", description: "Background music for relaxation", gradient: "from-teal-700 via-green-700 to-emerald-800" },
+        { id: 5, name: "Nature Sounds", description: "Peaceful and calming", gradient: "from-emerald-600 via-green-500 to-teal-500" },
+        { id: 6, name: "Evening Wind Down", description: "End your day peacefully", gradient: "from-teal-800 via-emerald-700 to-green-700" },
+      ],
+      'Focused': [
+        { id: 1, name: "Deep Focus", description: "Concentration music", gradient: "from-purple-600 via-purple-500 to-pink-500" },
+        { id: 2, name: "Study Session", description: "Perfect for productivity", gradient: "from-indigo-600 via-purple-600 to-purple-500" },
+        { id: 3, name: "Work Mode", description: "Get things done", gradient: "from-purple-700 via-indigo-600 to-blue-600" },
+        { id: 4, name: "Classical Focus", description: "Timeless concentration aids", gradient: "from-purple-500 via-pink-500 to-rose-500" },
+        { id: 5, name: "Coding Flow", description: "Developer's soundtrack", gradient: "from-indigo-700 via-purple-700 to-fuchsia-600" },
+        { id: 6, name: "Meditation Mix", description: "Clear your mind", gradient: "from-purple-600 via-violet-600 to-purple-700" },
+      ]
+    };
+
+    return playlistsByMood[currentMood] || playlistsByMood['Chill'];
+  };
+
+  const curatedPlaylists = getCuratedPlaylists(mood.name);
+  const recentlyPlayed: Track[] = allTracks.slice(0, 4);
+
+  // Map playlist names to search keywords for better results
+  const getPlaylistKeyword = (playlistName: string): string => {
+    const playlistKeywords: { [key: string]: string } = {
+      // Happy
+      'Happy Vibes Mix': 'happy upbeat',
+      'Energy Boost': 'energetic powerful',
+      'Feel Good Playlist': 'positive cheerful',
+      'Sunshine Mix': 'bright sunny',
+      'Dance Party': 'dance electronic',
+      'Good Morning': 'morning fresh',
+      
+      // Sad
+      'Melancholic Moments': 'melancholic emotional',
+      'Rainy Day Blues': 'sad blues',
+      'Emotional Journey': 'emotional ballad',
+      'Quiet Reflection': 'quiet ambient',
+      'Heartfelt Ballads': 'ballad heartfelt',
+      'Midnight Thoughts': 'night ambient',
+      
+      // Chill
+      'Chill Lounge': 'chill lounge',
+      'Ambient Dreams': 'ambient dreamy',
+      'Lazy Sunday': 'relaxing easy',
+      'Coffee Shop Beats': 'lofi chill',
+      'Nature Sounds': 'nature peaceful',
+      'Evening Wind Down': 'calm evening',
+      
+      // Focused
+      'Deep Focus': 'focus instrumental',
+      'Study Session': 'study concentration',
+      'Work Mode': 'productive work',
+      'Classical Focus': 'classical piano',
+      'Coding Flow': 'electronic ambient',
+      'Meditation Mix': 'meditation calm',
+    };
+    
+    return playlistKeywords[playlistName] || mood.name.toLowerCase();
+  };
+
+  // Handle playlist click - show playlist detail view
+  const handlePlaylistClick = async (playlist: any) => {
+    setLoadingPlaylist(playlist.id);
+    setActiveView("playlist");
+    
+    const searchKeyword = getPlaylistKeyword(playlist.name);
+    
+    try {
+      const tracks = await searchTracks(searchKeyword, 30);
+      
+      if (tracks.length > 0) {
+        setSelectedPlaylist({
+          name: playlist.name,
+          description: playlist.description,
+          gradient: playlist.gradient,
+          tracks: tracks,
+        });
+        console.log(`✅ Loaded ${tracks.length} tracks for "${playlist.name}"`);
+      } else {
+        console.log(`⚠️ No tracks found for "${playlist.name}", trying mood...`);
+        // Fallback to mood-based tracks
+        const moodTracks = await searchTracks(mood.name.toLowerCase(), 20);
+        if (moodTracks.length > 0) {
+          setSelectedPlaylist({
+            name: playlist.name,
+            description: playlist.description,
+            gradient: playlist.gradient,
+            tracks: moodTracks,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading playlist:', error);
+    } finally {
+      setLoadingPlaylist(null);
+    }
+  };
+
+  // Create new playlist
+  const handleCreatePlaylist = async () => {
+    if (newPlaylistName.trim() === "") return;
+    if (!user) {
+      onShowAuth();
+      return;
+    }
+    
+    try {
+      const result = await apiCreatePlaylist(newPlaylistName.trim());
+      const newPlaylist: UserPlaylist = {
+        id: Number(result.playlist.id),
+        name: result.playlist.name,
+        tracks: [],
+        createdAt: new Date(result.playlist.createdAt),
+      };
+      
+      setUserPlaylists([...userPlaylists, newPlaylist]);
+      setNewPlaylistName("");
+      setShowCreatePlaylist(false);
+    } catch (error) {
+      console.error('Error creating playlist:', error);
+      alert('Failed to create playlist. Please try again.');
+    }
+  };
+
+  // Add track to playlist
+  const handleAddToPlaylist = async (playlistId: number, track: Track) => {
+    if (!user) {
+      onShowAuth();
+      return;
+    }
+
+    try {
+      await apiAddTrackToPlaylist(playlistId.toString(), track);
+      
+      // Update local state
+      setUserPlaylists(userPlaylists.map(playlist => {
+        if (playlist.id === playlistId) {
+          // Check if track already exists
+          if (!playlist.tracks.find(t => t.id === track.id)) {
+            return { ...playlist, tracks: [...playlist.tracks, track] };
+          }
+        }
+        return playlist;
+      }));
+      setShowAddToPlaylist(null);
+    } catch (error) {
+      console.error('Error adding track:', error);
+      alert('Failed to add track. It may already be in the playlist.');
+    }
+  };
+
+  // Remove track from playlist
+  const handleRemoveFromPlaylist = async (playlistId: number, trackId: string) => {
+    if (!user) return;
+
+    try {
+      await apiRemoveTrackFromPlaylist(playlistId.toString(), trackId);
+      
+      const updatedPlaylists = userPlaylists.map(playlist => {
+        if (playlist.id === playlistId) {
+          return { ...playlist, tracks: playlist.tracks.filter(t => t.id !== trackId) };
+        }
+        return playlist;
+      });
+      setUserPlaylists(updatedPlaylists);
+      
+      // Update selected playlist if it's currently being viewed
+      if (selectedUserPlaylist?.id === playlistId) {
+        const updatedPlaylist = updatedPlaylists.find(p => p.id === playlistId);
+        if (updatedPlaylist) {
+          setSelectedUserPlaylist(updatedPlaylist);
+        }
+      }
+    } catch (error) {
+      console.error('Error removing track:', error);
+    }
+  };
+
+  // Delete playlist
+  const handleDeletePlaylist = async (playlistId: number) => {
+    if (!user) return;
+
+    try {
+      await apiDeletePlaylist(playlistId.toString());
+      
+      setUserPlaylists(userPlaylists.filter(p => p.id !== playlistId));
+      if (selectedUserPlaylist?.id === playlistId) {
+        setSelectedUserPlaylist(null);
+        setActiveView("home");
+      }
+    } catch (error) {
+      console.error('Error deleting playlist:', error);
+      alert('Failed to delete playlist. Please try again.');
+    }
+  };
+
+  return (
+    <div className="flex flex-1 overflow-hidden relative">
+      {/* Create Playlist Modal */}
+      {showCreatePlaylist && (
+        <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center">
+          <div className="bg-zinc-900 rounded-lg p-6 w-96">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Create Playlist</h2>
+              <button 
+                onClick={() => {
+                  setShowCreatePlaylist(false);
+                  setNewPlaylistName("");
+                }}
+                className="text-zinc-400 hover:text-white"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <input
+              type="text"
+              placeholder="My Playlist"
+              value={newPlaylistName}
+              onChange={(e) => setNewPlaylistName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCreatePlaylist();
+                if (e.key === 'Escape') {
+                  setShowCreatePlaylist(false);
+                  setNewPlaylistName("");
+                }
+              }}
+              autoFocus
+              className="w-full bg-zinc-800 rounded px-4 py-3 text-white placeholder-zinc-500 outline-none focus:ring-2 focus:ring-white mb-4"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowCreatePlaylist(false);
+                  setNewPlaylistName("");
+                }}
+                className="flex-1 py-2 px-4 bg-zinc-800 hover:bg-zinc-700 rounded-full font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreatePlaylist}
+                disabled={newPlaylistName.trim() === ""}
+                className="flex-1 py-2 px-4 bg-white text-black hover:scale-105 rounded-full font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add to Playlist Modal */}
+      {showAddToPlaylist && (
+        <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center">
+          <div className="bg-zinc-900 rounded-lg p-6 w-96 max-h-96 flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Add to Playlist</h2>
+              <button 
+                onClick={() => setShowAddToPlaylist(null)}
+                className="text-zinc-400 hover:text-white"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            {userPlaylists.length === 0 ? (
+              <div className="text-center text-zinc-400 py-8">
+                <p className="mb-4">You don&apos;t have any playlists yet</p>
+                <button
+                  onClick={() => {
+                    setShowAddToPlaylist(null);
+                    setShowCreatePlaylist(true);
+                  }}
+                  className="py-2 px-6 bg-white text-black hover:scale-105 rounded-full font-semibold transition-all"
+                >
+                  Create Playlist
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-y-auto flex-1">
+                {userPlaylists.map((playlist) => (
+                  <button
+                    key={playlist.id}
+                    onClick={() => handleAddToPlaylist(playlist.id, showAddToPlaylist)}
+                    className="w-full text-left p-3 hover:bg-zinc-800 rounded transition-colors flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="font-semibold">{playlist.name}</div>
+                      <div className="text-sm text-zinc-400">{playlist.tracks.length} songs</div>
+                    </div>
+                    {playlist.tracks.find(t => t.id === showAddToPlaylist.id) && (
+                      <Check size={20} className="text-green-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Sidebar */}
+      {/* Sidebar */}
+      <div className="w-64 bg-black p-6 flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
+          <button 
+            onClick={() => {
+              setActiveView("home");
+              setSearchQuery("");
+              setSelectedPlaylist(null);
+              setSelectedUserPlaylist(null);
+            }}
+            className={`flex items-center gap-4 transition-colors ${
+              activeView === "home" ? "text-white" : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            <Home size={24} />
+            <span className="font-semibold">Home</span>
+          </button>
+          <button 
+            onClick={() => {
+              setActiveView("search");
+              setSelectedPlaylist(null);
+              setSelectedUserPlaylist(null);
+            }}
+            className={`flex items-center gap-4 transition-colors ${
+              activeView === "search" ? "text-white" : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            <Search size={24} />
+            <span className="font-semibold">Search</span>
+          </button>
+          <button 
+            onClick={() => {
+              if (!user) {
+                onShowAuth();
+                return;
+              }
+              setActiveView("liked");
+              setSelectedPlaylist(null);
+              setSelectedUserPlaylist(null);
+            }}
+            className={`flex items-center gap-4 transition-colors ${
+              activeView === "liked" ? "text-white" : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            <Heart size={24} className={activeView === "liked" ? "fill-white" : ""} />
+            <span className="font-semibold">Liked Songs</span>
+          </button>
+        </div>
+
+        {/* Auth Section */}
+        <div className="border-t border-zinc-800 pt-4">
+          {user ? (
+            <div className="space-y-3">
+              <div className="px-2">
+                <p className="text-sm text-zinc-400">Signed in as</p>
+                <p className="font-semibold truncate">{user.name}</p>
+                <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+              </div>
+              <button 
+                onClick={onLogout}
+                className="w-full text-left px-2 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={onShowAuth}
+              className="w-full px-4 py-3 bg-white text-black font-semibold rounded-full hover:scale-105 transition-transform"
+            >
+              Login / Sign Up
+            </button>
+          )}
+        </div>
+
+        <div className="border-t border-zinc-800 pt-4">
+          <button 
+            onClick={() => {
+              if (!user) {
+                onShowAuth();
+                return;
+              }
+              setShowCreatePlaylist(true);
+            }}
+            className="flex items-center gap-4 text-zinc-400 hover:text-white transition-colors w-full"
+          >
+            <Plus size={24} />
+            <span className="font-semibold">Create Playlist</span>
+          </button>
+        </div>
+
+        {/* User Playlists */}
+        {userPlaylists.length > 0 && (
+          <div className="border-t border-zinc-800 pt-4 flex-1 overflow-y-auto">
+            <h3 className="text-xs font-semibold text-zinc-400 mb-3 uppercase tracking-wide">Your Playlists</h3>
+            <div className="flex flex-col gap-2">
+              {userPlaylists.map((playlist) => (
+                <button
+                  key={playlist.id}
+                  onClick={() => {
+                    setSelectedUserPlaylist(playlist);
+                    setActiveView("user-playlist");
+                    setSelectedPlaylist(null);
+                  }}
+                  className={`text-left text-sm transition-colors p-2 rounded ${
+                    selectedUserPlaylist?.id === playlist.id 
+                      ? "bg-zinc-800 text-white" 
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  <div className="font-semibold">{playlist.name}</div>
+                  <div className="text-xs text-zinc-500">{playlist.tracks.length} songs</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 bg-gradient-to-b from-zinc-900 to-black overflow-y-auto">
+        {/* Header with Gradient - Only for Home and Search */}
+        {(activeView === "home" || activeView === "search") && (
+          <div className={`bg-gradient-to-b ${mood.gradient} p-8 pb-6`}>
+            {activeView === "home" ? (
+              <>
+                <h1 className="text-6xl font-bold mb-2 animate-text-reveal">
+                  Welcome
+                </h1>
+                <p className="text-white/80 text-lg">{mood.description}</p>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="relative flex-1 max-w-3xl">
+                    <input
+                      type="text"
+                      placeholder="What do you want to listen to?"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                      className="w-full bg-white rounded-full px-12 py-3 text-black placeholder-zinc-600 outline-none focus:ring-2 focus:ring-white"
+                    />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={20} />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-black"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <h1 className="text-4xl font-bold mb-2">Search</h1>
+                <p className="text-white/80">Find your favorite songs, artists, and albums</p>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Content Sections */}
+        <div className="p-8 space-y-8">
+          {/* Playlist Detail View */}
+          {activeView === "playlist" && selectedPlaylist && (
+            <>
+              <section>
+                <button
+                  onClick={() => {
+                    setActiveView("home");
+                    setSelectedPlaylist(null);
+                  }}
+                  className="flex items-center gap-2 text-zinc-400 hover:text-white mb-6 transition-colors"
+                >
+                  <span className="text-2xl">←</span>
+                  <span>Back to Home</span>
+                </button>
+
+                <div className="flex items-start gap-6 mb-8">
+                  <div className={`w-48 h-48 bg-gradient-to-br ${selectedPlaylist.gradient} rounded-lg shadow-2xl flex items-center justify-center flex-shrink-0`}>
+                    <div className="text-8xl">🎵</div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold mb-2">PLAYLIST</p>
+                    <h1 className="text-5xl font-bold mb-4">{selectedPlaylist.name}</h1>
+                    <p className="text-zinc-400 mb-4">{selectedPlaylist.description}</p>
+                    <p className="text-sm text-zinc-400">{selectedPlaylist.tracks.length} songs</p>
+                    <button
+                      onClick={() => {
+                        onPlayPlaylist(selectedPlaylist.tracks);
+                      }}
+                      className="mt-6 bg-green-500 hover:bg-green-400 text-black font-semibold px-8 py-3 rounded-full flex items-center gap-2 transition-colors"
+                    >
+                      <Play size={24} className="fill-black" />
+                      Play
+                    </button>
+                  </div>
+                </div>
+
+                {/* Track List */}
+                <div className="space-y-1">
+                  <div className="grid grid-cols-[50px_1fr_1fr_100px_50px_100px] gap-4 px-4 py-2 text-sm text-zinc-400 border-b border-zinc-800">
+                    <div>#</div>
+                    <div>Title</div>
+                    <div>Album</div>
+                    <div>Duration</div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                  {selectedPlaylist.tracks.map((track, index) => (
+                    <div
+                      key={track.id}
+                      className="grid grid-cols-[50px_1fr_1fr_100px_50px_100px] gap-4 px-4 py-3 rounded-lg hover:bg-zinc-800/50 group items-center"
+                    >
+                      <div 
+                        onClick={() => onTrackSelect(track)}
+                        className="cursor-pointer"
+                      >
+                        <div className="text-zinc-400 group-hover:hidden">{index + 1}</div>
+                        <Play size={16} className="hidden group-hover:block fill-white" />
+                      </div>
+                      <div 
+                        onClick={() => onTrackSelect(track)}
+                        className="flex flex-col min-w-0 cursor-pointer"
+                      >
+                        <span className="font-semibold truncate">{track.title}</span>
+                        <span className="text-sm text-zinc-400 truncate">{track.artist}</span>
+                      </div>
+                      <div className="text-sm text-zinc-400 truncate">{track.album}</div>
+                      <div className="text-sm text-zinc-400">{track.duration}</div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleLike(track.id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center"
+                      >
+                        <Heart 
+                          size={18} 
+                          className={`transition-colors ${likedSongs.has(track.id) ? 'fill-green-500 text-green-500' : 'text-zinc-400 hover:text-white'}`}
+                        />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowAddToPlaylist(track);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded-full text-sm font-semibold transition-all"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* User Playlist View */}
+          {activeView === "user-playlist" && selectedUserPlaylist && (
+            <>
+              <section>
+                <button
+                  onClick={() => {
+                    setActiveView("home");
+                    setSelectedUserPlaylist(null);
+                  }}
+                  className="flex items-center gap-2 text-zinc-400 hover:text-white mb-6 transition-colors"
+                >
+                  <span className="text-2xl">←</span>
+                  <span>Back to Home</span>
+                </button>
+
+                <div className="flex items-start gap-6 mb-8">
+                  <div className={`w-48 h-48 bg-gradient-to-br ${mood.gradient} rounded-lg shadow-2xl flex items-center justify-center flex-shrink-0`}>
+                    <div className="text-8xl">📁</div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold mb-2">PLAYLIST</p>
+                    <h1 className="text-5xl font-bold mb-4">{selectedUserPlaylist.name}</h1>
+                    <p className="text-zinc-400 mb-4">Created by you</p>
+                    <p className="text-sm text-zinc-400">{selectedUserPlaylist.tracks.length} songs</p>
+                    <div className="flex gap-4 mt-6">
+                      {selectedUserPlaylist.tracks.length > 0 && (
+                        <button
+                          onClick={() => {
+                            onPlayPlaylist(selectedUserPlaylist.tracks);
+                          }}
+                          className="bg-green-500 hover:bg-green-400 text-black font-semibold px-8 py-3 rounded-full flex items-center gap-2 transition-colors"
+                        >
+                          <Play size={24} className="fill-black" />
+                          Play
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (confirm(`Delete "${selectedUserPlaylist.name}"?`)) {
+                            handleDeletePlaylist(selectedUserPlaylist.id);
+                          }
+                        }}
+                        className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold px-6 py-3 rounded-full transition-colors"
+                      >
+                        Delete Playlist
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Track List */}
+                {selectedUserPlaylist.tracks.length > 0 ? (
+                  <div className="space-y-1">
+                    <div className="grid grid-cols-[50px_1fr_1fr_100px_50px_100px] gap-4 px-4 py-2 text-sm text-zinc-400 border-b border-zinc-800">
+                      <div>#</div>
+                      <div>Title</div>
+                      <div>Album</div>
+                      <div>Duration</div>
+                      <div></div>
+                      <div></div>
+                    </div>
+                    {selectedUserPlaylist.tracks.map((track, index) => (
+                      <div
+                        key={track.id}
+                        className="grid grid-cols-[50px_1fr_1fr_100px_50px_100px] gap-4 px-4 py-3 rounded-lg hover:bg-zinc-800/50 group items-center"
+                      >
+                        <div 
+                          onClick={() => onTrackSelect(track)}
+                          className="cursor-pointer"
+                        >
+                          <div className="text-zinc-400 group-hover:hidden">{index + 1}</div>
+                          <Play size={16} className="hidden group-hover:block fill-white" />
+                        </div>
+                        <div 
+                          onClick={() => onTrackSelect(track)}
+                          className="flex flex-col min-w-0 cursor-pointer"
+                        >
+                          <span className="font-semibold truncate">{track.title}</span>
+                          <span className="text-sm text-zinc-400 truncate">{track.artist}</span>
+                        </div>
+                        <div className="text-sm text-zinc-400 truncate">{track.album}</div>
+                        <div className="text-sm text-zinc-400">{track.duration}</div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleLike(track.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center"
+                        >
+                          <Heart 
+                            size={18} 
+                            className={`transition-colors ${likedSongs.has(track.id) ? 'fill-green-500 text-green-500' : 'text-zinc-400 hover:text-white'}`}
+                          />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFromPlaylist(selectedUserPlaylist.id, track.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 px-3 py-1 bg-red-700 hover:bg-red-600 rounded-full text-sm font-semibold transition-all"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-zinc-400">
+                    <Plus size={64} className="mx-auto mb-4 opacity-30" />
+                    <p className="text-lg mb-2">This playlist is empty</p>
+                    <p className="text-sm">Search for songs and add them to this playlist</p>
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+
+          {/* Search View */}
+          {activeView === "search" && (
+            <>
+              {searchQuery.trim().length === 0 ? (
+                /* Search Browse - Show when no query */
+                <section>
+                  <h2 className="text-2xl font-bold mb-6">Browse all</h2>
+                  <div className="grid grid-cols-4 gap-4">
+                    {[
+                      { name: "Pop", gradient: "from-pink-500 to-purple-500" },
+                      { name: "Rock", gradient: "from-red-500 to-orange-500" },
+                      { name: "Hip-Hop", gradient: "from-yellow-500 to-orange-600" },
+                      { name: "Jazz", gradient: "from-blue-500 to-indigo-500" },
+                      { name: "Classical", gradient: "from-purple-500 to-pink-500" },
+                      { name: "Electronic", gradient: "from-cyan-500 to-blue-500" },
+                      { name: "Indie", gradient: "from-green-500 to-teal-500" },
+                      { name: "R&B", gradient: "from-red-400 to-pink-500" },
+                      { name: "Country", gradient: "from-amber-500 to-yellow-500" },
+                      { name: "Latin", gradient: "from-orange-500 to-red-500" },
+                      { name: "Metal", gradient: "from-gray-700 to-gray-900" },
+                      { name: "Blues", gradient: "from-blue-600 to-blue-800" },
+                    ].map((genre, i) => (
+                      <div
+                        key={i}
+                        onClick={() => setSearchQuery(genre.name)}
+                        className={`h-32 bg-gradient-to-br ${genre.gradient} rounded-lg p-4 cursor-pointer hover:scale-105 transition-transform flex items-end relative overflow-hidden`}
+                      >
+                        <span className="font-bold text-2xl relative z-10">{genre.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ) : (
+                /* Search Results */
+                <section>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold">
+                      {isSearching ? "Searching..." : `Results for "${searchQuery}"`}
+                    </h2>
+                    {searchResults.length > 0 && (
+                      <span className="text-sm text-zinc-400">{searchResults.length} tracks found</span>
+                    )}
+                  </div>
+                  
+                  {isSearching ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="space-y-2">
+                      {searchResults.map((track, index) => (
+                        <div
+                          key={track.id}
+                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-800/50 group transition-all"
+                        >
+                          <div 
+                            onClick={() => onTrackSelect(track)}
+                            className="flex items-center justify-center w-10 h-10 bg-zinc-800 rounded group-hover:bg-green-500 transition-all cursor-pointer"
+                          >
+                            <Play size={20} className="fill-white" />
+                          </div>
+                          <div 
+                            onClick={() => onTrackSelect(track)}
+                            className="flex-1 min-w-0 cursor-pointer"
+                          >
+                            <h3 className="font-semibold truncate">{track.title}</h3>
+                            <p className="text-sm text-zinc-400 truncate">{track.artist}</p>
+                          </div>
+                          <div className="text-sm text-zinc-400 hidden md:block">{track.album}</div>
+                          <div className="text-sm text-zinc-400">{track.duration}</div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleLike(track.id);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <Heart 
+                              size={20} 
+                              className={`transition-colors ${likedSongs.has(track.id) ? 'fill-green-500 text-green-500' : 'text-zinc-400 hover:text-white'}`}
+                            />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowAddToPlaylist(track);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-full text-sm font-semibold transition-all"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-zinc-400">
+                      <Search size={64} className="mx-auto mb-4 opacity-30" />
+                      <p className="text-lg">No results found for "{searchQuery}"</p>
+                      <p className="text-sm mt-2">Try different keywords or check your spelling</p>
+                    </div>
+                  )}
+                </section>
+              )}
+            </>
+          )}
+
+          {/* Liked Songs View */}
+          {activeView === "liked" && (
+            <>
+              <section>
+                <button
+                  onClick={() => setActiveView("home")}
+                  className="flex items-center gap-2 text-zinc-400 hover:text-white mb-6 transition-colors"
+                >
+                  <span className="text-2xl">←</span>
+                  <span>Back to Home</span>
+                </button>
+
+                <div className="flex items-start gap-6 mb-8">
+                  <div className="w-48 h-48 bg-gradient-to-br from-purple-600 via-purple-500 to-pink-500 rounded-lg shadow-2xl flex items-center justify-center flex-shrink-0">
+                    <Heart size={80} className="text-white fill-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold mb-2">PLAYLIST</p>
+                    <h1 className="text-5xl font-bold mb-4">Liked Songs</h1>
+                    <p className="text-zinc-400 mb-4">Your favorite tracks</p>
+                    <p className="text-sm text-zinc-400">{likedSongsTracks.length} songs</p>
+                    {likedSongsTracks.length > 0 && (
+                      <button
+                        onClick={() => {
+                          if (likedSongsTracks.length > 0) {
+                            onTrackSelect(likedSongsTracks[0]);
+                          }
+                        }}
+                        className="mt-6 bg-green-500 hover:bg-green-400 text-black font-semibold px-8 py-3 rounded-full flex items-center gap-2 transition-colors"
+                      >
+                        <Play size={24} className="fill-black" />
+                        Play
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Track List */}
+                {likedSongsTracks.length > 0 ? (
+                  <div className="space-y-1">
+                    <div className="grid grid-cols-[50px_1fr_1fr_100px_100px] gap-4 px-4 py-2 text-sm text-zinc-400 border-b border-zinc-800">
+                      <div>#</div>
+                      <div>Title</div>
+                      <div>Album</div>
+                      <div>Duration</div>
+                      <div></div>
+                    </div>
+                    {likedSongsTracks
+                      .map((track, index) => (
+                        <div
+                          key={track.id}
+                          className="grid grid-cols-[50px_1fr_1fr_100px_100px] gap-4 px-4 py-3 rounded-lg hover:bg-zinc-800/50 group items-center"
+                        >
+                          <div 
+                            onClick={() => onTrackSelect(track)}
+                            className="cursor-pointer"
+                          >
+                            <div className="text-zinc-400 group-hover:hidden">{index + 1}</div>
+                            <Play size={16} className="hidden group-hover:block fill-white" />
+                          </div>
+                          <div 
+                            onClick={() => onTrackSelect(track)}
+                            className="flex flex-col min-w-0 cursor-pointer"
+                          >
+                            <span className="font-semibold truncate">{track.title}</span>
+                            <span className="text-sm text-zinc-400 truncate">{track.artist}</span>
+                          </div>
+                          <div className="text-sm text-zinc-400 truncate">{track.album}</div>
+                          <div className="text-sm text-zinc-400">{track.duration}</div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleLike(track.id);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 px-3 py-1 rounded-full text-sm font-semibold transition-all flex items-center gap-1"
+                          >
+                            <Heart size={16} className="fill-red-500 text-red-500" />
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-zinc-400">
+                    <Heart size={64} className="mx-auto mb-4 opacity-30" />
+                    <p className="text-lg mb-2">No liked songs yet</p>
+                    <p className="text-sm">Songs you like will appear here</p>
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+
+          {/* Home View */}
+          {activeView === "home" && (
+            <>
+              {/* Curated Playlists for Current Mood */}
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold">{mood.name} Playlists</h2>
+                  <button className="text-sm font-semibold text-zinc-400 hover:text-white">Show all</button>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  {curatedPlaylists.map((playlist) => (
+                    <div
+                      key={playlist.id}
+                      onClick={() => handlePlaylistClick(playlist)}
+                      className="bg-zinc-800/40 hover:bg-zinc-800 p-4 rounded-lg transition-all cursor-pointer group relative"
+                    >
+                      <div className={`w-full aspect-square bg-gradient-to-br ${playlist.gradient} rounded-lg mb-4 shadow-lg flex items-center justify-center relative overflow-hidden`}>
+                        {loadingPlaylist === playlist.id ? (
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+                        ) : (
+                          <>
+                            <div className="text-6xl opacity-50">🎵</div>
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Play size={48} className="fill-white" />
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      <h3 className="font-semibold mb-1 truncate">{playlist.name}</h3>
+                      <p className="text-sm text-zinc-400 truncate">{playlist.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Current Mood Tracks */}
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold">Your {mood.name} Mix</h2>
+                  <button className="text-sm font-semibold text-zinc-400 hover:text-white">See all</button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {allTracks.slice(0, 6).map((track) => (
+                    <div
+                      key={track.id}
+                      className="flex items-center gap-4 bg-zinc-800/40 hover:bg-zinc-800 p-3 rounded-lg transition-all group relative"
+                    >
+                      <div 
+                        onClick={() => onTrackSelect(track)}
+                        className={`w-16 h-16 bg-gradient-to-br ${mood.gradient} rounded flex-shrink-0 flex items-center justify-center cursor-pointer`}
+                      >
+                        <Play size={24} className="opacity-0 group-hover:opacity-100 transition-opacity fill-white" />
+                      </div>
+                      <div 
+                        onClick={() => onTrackSelect(track)}
+                        className="flex-1 min-w-0 cursor-pointer"
+                      >
+                        <h4 className="font-semibold truncate">{track.title}</h4>
+                        <p className="text-sm text-zinc-400 truncate">{track.artist}</p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleLike(track.id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center mr-2"
+                      >
+                        <Heart 
+                          size={18} 
+                          className={`transition-colors ${likedSongs.has(track.id) ? 'fill-green-500 text-green-500' : 'text-zinc-400 hover:text-white'}`}
+                        />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowAddToPlaylist(track);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded-full text-xs font-semibold transition-all"
+                      >
+                        +
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Recommended for You */}
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold">Recommended for you</h2>
+                </div>
+                <div className="grid grid-cols-4 gap-4">
+                  {allTracks.slice(6, 14).map((track, i) => (
+                    <div
+                      key={track.id}
+                      className="bg-zinc-800/40 hover:bg-zinc-800 p-4 rounded-lg transition-all group relative"
+                    >
+                      <div 
+                        onClick={() => onTrackSelect(track)}
+                        className={`w-full aspect-square bg-gradient-to-br ${mood.gradient} rounded-lg mb-4 shadow-lg flex items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform cursor-pointer`}
+                      >
+                        <span className="text-4xl opacity-30">🎵</span>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play size={40} className="fill-white" />
+                        </div>
+                      </div>
+                      <div onClick={() => onTrackSelect(track)} className="cursor-pointer">
+                        <h3 className="font-semibold mb-1 truncate">{track.title}</h3>
+                        <p className="text-sm text-zinc-400 truncate">{track.artist}</p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleLike(track.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-zinc-700"
+                        >
+                          <Heart 
+                            size={20} 
+                            className={`transition-colors ${likedSongs.has(track.id) ? 'fill-green-500 text-green-500' : 'text-zinc-400 hover:text-white'}`}
+                          />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowAddToPlaylist(track);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 ml-auto w-8 h-8 bg-green-500 hover:bg-green-400 rounded-full flex items-center justify-center font-bold text-black transition-all shadow-lg"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

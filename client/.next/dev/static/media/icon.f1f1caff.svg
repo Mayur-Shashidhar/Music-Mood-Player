@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Music notes -->
+  <g fill="#000000">
+    <!-- First note -->
+    <ellipse cx="35" cy="75" rx="12" ry="8"/>
+    <rect x="45" y="25" width="4" height="50" rx="2"/>
+    <path d="M 45 25 L 70 18 L 70 22 L 49 29 Z"/>
+    
+    <!-- Second note -->
+    <ellipse cx="60" cy="68" rx="12" ry="8"/>
+    <rect x="70" y="18" width="4" height="50" rx="2"/>
+  </g>
+</svg>
