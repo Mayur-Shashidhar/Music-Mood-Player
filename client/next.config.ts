@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: '/Users/mayurshadhidhar/Music-Mood-Player/client',
-  },
   images: {
     remotePatterns: [
       {
