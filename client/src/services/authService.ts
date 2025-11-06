@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'https://music-mood-player-1.onrender.com/api';
 
 // Get auth token from localStorage
 const getToken = (): string | null => {
