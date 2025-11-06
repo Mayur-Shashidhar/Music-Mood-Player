@@ -1571,16 +1571,13 @@ export default function Dashboard({
                         <h3 className="font-semibold mb-1 truncate group-hover:text-white transition-colors duration-500 ease-out">{track.title}</h3>
                         <p className="text-sm text-zinc-400 truncate group-hover:text-zinc-300 transition-colors duration-500 ease-out">{track.artist}</p>
                       </div>
-                      <div className="flex items-center justify-between mt-3 relative z-10">
+                      <div className="flex items-center justify-between mt-3">
                         <button
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
                             onToggleLike(track.id);
                           }}
-                          onMouseDown={(e) => e.stopPropagation()}
-                          onMouseUp={(e) => e.stopPropagation()}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 relative z-20 ${
+                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 -m-2 ${
                             likedSongs.has(track.id) 
                               ? 'bg-green-500/20 opacity-100' 
                               : 'opacity-0 group-hover:opacity-100 hover:bg-zinc-700/50'
@@ -1588,7 +1585,7 @@ export default function Dashboard({
                         >
                           <Heart 
                             size={18} 
-                            className={`transition-all duration-300 pointer-events-none ${
+                            className={`transition-all duration-300 ${
                               likedSongs.has(track.id) 
                                 ? 'fill-green-500 text-green-500 scale-110' 
                                 : 'text-zinc-400 hover:text-white'
@@ -1597,16 +1594,13 @@ export default function Dashboard({
                         </button>
                         <button
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
                             setShowAddToPlaylist(track);
                           }}
-                          onMouseDown={(e) => e.stopPropagation()}
-                          onMouseUp={(e) => e.stopPropagation()}
-                          className="opacity-0 group-hover:opacity-100 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm relative z-20"
+                          className="opacity-0 group-hover:opacity-100 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm -m-2"
                           title="Add to playlist"
                         >
-                          <span className="text-white font-bold text-sm pointer-events-none">+</span>
+                          <span className="text-white font-bold text-sm">+</span>
                         </button>
                       </div>
                     </div>
