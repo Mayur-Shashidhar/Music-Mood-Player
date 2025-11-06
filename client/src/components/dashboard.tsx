@@ -91,6 +91,17 @@ export default function Dashboard({
     setTimeout(() => setNotification(null), 4000); // Auto-hide after 4 seconds
   };
 
+  // Get custom welcome message based on mood
+  const getWelcomeMessage = (moodName: string) => {
+    const messages: { [key: string]: string } = {
+      "Happy": "Vibes high, smiles brighter",
+      "Sad": "Rain before the bloom", 
+      "Chill": "Waves calm, mind clear",
+      "Focused": "Clarity meets ambition"
+    };
+    return messages[moodName] || "Welcome to your mood";
+  };
+
   // Trigger welcome animation on mood change
   useEffect(() => {
     setWelcomeAnimationKey(prev => prev + 1);
@@ -939,7 +950,7 @@ export default function Dashboard({
                   key={`welcome-${welcomeAnimationKey}`}
                   className="text-6xl font-bold mb-2 animate-text-reveal"
                 >
-                  Welcome
+                  {getWelcomeMessage(mood.name)}
                 </h1>
                 <p 
                   key={`description-${welcomeAnimationKey}`}
