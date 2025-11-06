@@ -80,6 +80,16 @@ export default function Dashboard({
   const [welcomeAnimationKey, setWelcomeAnimationKey] = useState(0);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
+
+  // Show notification function
+  const showNotification = (message: string, type: 'success' | 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000); // Auto-hide after 4 seconds
+  };
 
   // Trigger welcome animation on mood change
   useEffect(() => {
@@ -274,7 +284,7 @@ export default function Dashboard({
       setShowCreatePlaylist(false);
     } catch (error) {
       console.error('Error creating playlist:', error);
-      alert('Failed to create playlist. Please try again.');
+      showNotification('Failed to create playlist. Please try again.', 'error');
     }
   };
 
@@ -301,7 +311,7 @@ export default function Dashboard({
       setShowAddToPlaylist(null);
     } catch (error) {
       console.error('Error adding track:', error);
-      alert('Failed to add track. It may already be in the playlist.');
+      showNotification('Failed to add track. It may already be in the playlist.', 'error');
     }
   };
 
@@ -346,7 +356,7 @@ export default function Dashboard({
       }
     } catch (error) {
       console.error('Error deleting playlist:', error);
-      alert('Failed to delete playlist. Please try again.');
+      showNotification('Failed to delete playlist. Please try again.', 'error');
     }
   };
 
@@ -627,6 +637,40 @@ export default function Dashboard({
     );
   };
 
+  // Notification Component
+  const NotificationToast = () => {
+    if (!notification) return null;
+
+    return (
+      <div className="fixed top-4 right-4 z-[100] animate-in slide-in-from-right-full duration-300">
+        <div className={`
+          px-6 py-4 rounded-xl shadow-lg border backdrop-blur-sm max-w-sm
+          ${notification.type === 'success' 
+            ? 'bg-green-500/90 border-green-400 text-white' 
+            : 'bg-red-500/90 border-red-400 text-white'
+          }
+        `}>
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              {notification.type === 'success' ? (
+                <Check size={20} />
+              ) : (
+                <X size={20} />
+              )}
+            </div>
+            <p className="font-medium text-sm">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="flex-shrink-0 ml-2 hover:opacity-70 transition-opacity"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-1 overflow-hidden relative">
       {/* Create Playlist Modal */}
@@ -737,10 +781,10 @@ export default function Dashboard({
           onClose={() => setShowChangePassword(false)}
           onSuccess={() => {
             setShowChangePassword(false);
-            alert('Password changed successfully!');
+            showNotification('Password changed successfully!', 'success');
           }}
           onError={(error: string) => {
-            alert(`Failed to change password: ${error}`);
+            showNotification(`Failed to change password: ${error}`, 'error');
           }}
         />
       )}
@@ -1563,6 +1607,9 @@ export default function Dashboard({
           )}
         </div>
       </div>
+
+      {/* Notification Toast */}
+      <NotificationToast />
     </div>
   );
 }
