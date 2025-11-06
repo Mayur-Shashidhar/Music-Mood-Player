@@ -108,3 +108,30 @@ export const unlikeSong = async (trackId: string) => {
   if (!response.ok) throw new Error('Failed to unlike song');
   return response.json();
 };
+
+// Change password
+export const changePassword = async (currentPassword: string, newPassword: string) => {
+  const response = await fetch(`${API_URL}/auth/change-password`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to change password');
+  }
+  return response.json();
+};
+
+// Delete account - permanently removes user from database
+export const deleteAccount = async () => {
+  const response = await fetch(`${API_URL}/auth/delete-account`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete account');
+  }
+  return response.json();
+};

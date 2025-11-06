@@ -1,6 +1,6 @@
 // components/Dashboard.tsx
 "use client";
-import { Search, Home, Play, Plus, X, Check, Heart } from "lucide-react";
+import { Search, Home, Play, Plus, X, Check, Heart, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Track } from "@/data/tracks";
 import { searchTracks } from "@/services/musicService";
@@ -10,6 +10,8 @@ import {
   deletePlaylist as apiDeletePlaylist,
   addTrackToPlaylist as apiAddTrackToPlaylist,
   removeTrackFromPlaylist as apiRemoveTrackFromPlaylist,
+  changePassword as apiChangePassword,
+  deleteAccount as apiDeleteAccount,
 } from "@/services/authService";
 
 interface Mood {
@@ -75,6 +77,14 @@ export default function Dashboard({
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [selectedUserPlaylist, setSelectedUserPlaylist] = useState<UserPlaylist | null>(null);
   const [showAddToPlaylist, setShowAddToPlaylist] = useState<Track | null>(null);
+  const [welcomeAnimationKey, setWelcomeAnimationKey] = useState(0);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+
+  // Trigger welcome animation on mood change
+  useEffect(() => {
+    setWelcomeAnimationKey(prev => prev + 1);
+  }, [mood.name]);
 
   // Load user playlists when user logs in
   useEffect(() => {
@@ -340,6 +350,283 @@ export default function Dashboard({
     }
   };
 
+  // Change password
+  const handleChangePassword = () => {
+    if (!user) return;
+    setShowChangePassword(true);
+  };
+
+  // Delete account
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setShowDeleteAccount(true);
+  };
+
+  const handleConfirmDeleteAccount = async (confirmationText: string) => {
+    if (confirmationText !== 'DELETE') {
+      return 'You must type "DELETE" exactly to confirm account deletion.';
+    }
+
+    try {
+      await apiDeleteAccount();
+
+      // Clear local storage and logout
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // Reset all states
+      setUserPlaylists([]);
+      setSelectedUserPlaylist(null);
+      setActiveView('home');
+      setShowDeleteAccount(false);
+      
+      // Call logout to update parent component
+      onLogout();
+      
+      return null; // Success
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      return `Failed to delete account: ${error.message}`;
+    }
+  };
+
+  // Change Password Modal Component
+  const ChangePasswordModal = ({ 
+    onClose, 
+    onSuccess, 
+    onError 
+  }: { 
+    onClose: () => void; 
+    onSuccess: () => void; 
+    onError: (error: string) => void; 
+  }) => {
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      if (newPassword.length < 6) {
+        onError('New password must be at least 6 characters long.');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        onError('New passwords do not match.');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        await apiChangePassword(currentPassword, newPassword);
+        onSuccess();
+      } catch (error: any) {
+        onError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center">
+        <div className="bg-zinc-900 rounded-2xl p-8 w-96 max-w-md">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-white">Change Password</h2>
+            <button 
+              onClick={onClose}
+              className="text-zinc-400 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-white text-base font-medium mb-3">Current Password</label>
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full bg-zinc-800 border-0 rounded-xl px-4 py-4 pr-12 text-white placeholder-zinc-500 focus:outline-none focus:ring-0 text-base"
+                  placeholder="Enter current password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white focus:outline-none transition-colors"
+                >
+                  {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-white text-base font-medium mb-3">New Password</label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-zinc-800 border-0 rounded-xl px-4 py-4 pr-12 text-white placeholder-zinc-500 focus:outline-none focus:ring-0 text-base"
+                  placeholder="Enter new password (min 6 chars)"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white focus:outline-none transition-colors"
+                >
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-white text-base font-medium mb-3">Confirm New Password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-zinc-800 border-0 rounded-xl px-4 py-4 pr-12 text-white placeholder-zinc-500 focus:outline-none focus:ring-0 text-base"
+                  placeholder="Confirm new password"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white focus:outline-none transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading || !currentPassword || !newPassword || !confirmPassword}
+                className="w-full py-4 px-6 bg-green-500 hover:bg-green-400 text-black font-bold text-lg rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-500"
+              >
+                {loading ? "Changing..." : "Change Password"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
+  // Delete Account Modal Component
+  const DeleteAccountModal = ({ 
+    onClose, 
+    onConfirm 
+  }: { 
+    onClose: () => void; 
+    onConfirm: (confirmationText: string) => Promise<string | null>; 
+  }) => {
+    const [confirmationText, setConfirmationText] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError("");
+      setLoading(true);
+      
+      try {
+        const result = await onConfirm(confirmationText);
+        if (result) {
+          setError(result);
+        } else {
+          onClose();
+        }
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center">
+        <div className="bg-zinc-900 rounded-2xl p-8 w-96 max-w-md">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white">Delete Account</h2>
+            <button 
+              onClick={onClose}
+              className="text-zinc-400 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-zinc-300 text-sm mb-4">
+              Are you sure you want to delete your account? This action cannot be undone.
+            </p>
+            
+            <div className="text-zinc-400 text-sm space-y-1 mb-4">
+              <p className="font-medium">This will permanently delete:</p>
+              <p>- Your account data</p>
+              <p>- All your playlists</p>
+              <p>- All your liked songs</p>
+            </div>
+
+            <p className="text-zinc-300 text-sm font-medium">
+              Type "DELETE" to confirm.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input
+                type="text"
+                value={confirmationText}
+                onChange={(e) => setConfirmationText(e.target.value)}
+                className="w-full bg-zinc-800 border-0 rounded-xl px-4 py-4 text-white placeholder-zinc-500 focus:outline-none focus:ring-0 text-base"
+                placeholder="Type DELETE to confirm"
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="text-red-400 text-sm bg-red-500/10 rounded-lg p-3">
+                {error}
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-3 px-4 bg-zinc-700 hover:bg-zinc-600 text-white rounded-full font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading || confirmationText !== 'DELETE'}
+                className="flex-1 py-3 px-4 bg-red-500 hover:bg-red-400 text-white rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500"
+              >
+                {loading ? "Deleting..." : "Delete Account"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-1 overflow-hidden relative">
       {/* Create Playlist Modal */}
@@ -444,6 +731,27 @@ export default function Dashboard({
         </div>
       )}
 
+      {/* Change Password Modal */}
+      {showChangePassword && (
+        <ChangePasswordModal 
+          onClose={() => setShowChangePassword(false)}
+          onSuccess={() => {
+            setShowChangePassword(false);
+            alert('Password changed successfully!');
+          }}
+          onError={(error: string) => {
+            alert(`Failed to change password: ${error}`);
+          }}
+        />
+      )}
+
+      {showDeleteAccount && (
+        <DeleteAccountModal 
+          onClose={() => setShowDeleteAccount(false)}
+          onConfirm={handleConfirmDeleteAccount}
+        />
+      )}
+
       {/* Sidebar */}
       {/* Sidebar */}
       <div className="w-64 bg-black p-6 flex flex-col gap-6">
@@ -509,6 +817,18 @@ export default function Dashboard({
               >
                 Logout
               </button>
+              <button 
+                onClick={handleChangePassword}
+                className="w-full text-left px-2 py-2 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-900/20 rounded transition-colors"
+              >
+                Change Password
+              </button>
+              <button 
+                onClick={handleDeleteAccount}
+                className="w-full text-left px-2 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded transition-colors"
+              >
+                Delete Account
+              </button>
             </div>
           ) : (
             <button 
@@ -571,10 +891,18 @@ export default function Dashboard({
           <div className={`bg-gradient-to-b ${mood.gradient} p-8 pb-6`}>
             {activeView === "home" ? (
               <>
-                <h1 className="text-6xl font-bold mb-2 animate-text-reveal">
+                <h1 
+                  key={`welcome-${welcomeAnimationKey}`}
+                  className="text-6xl font-bold mb-2 animate-text-reveal"
+                >
                   Welcome
                 </h1>
-                <p className="text-white/80 text-lg">{mood.description}</p>
+                <p 
+                  key={`description-${welcomeAnimationKey}`}
+                  className="text-white/80 text-lg animate-text-reveal-delayed"
+                >
+                  {mood.description}
+                </p>
               </>
             ) : (
               <>
@@ -1188,27 +1516,42 @@ export default function Dashboard({
                         <h3 className="font-semibold mb-1 truncate group-hover:text-white transition-colors duration-500 ease-out">{track.title}</h3>
                         <p className="text-sm text-zinc-400 truncate group-hover:text-zinc-300 transition-colors duration-500 ease-out">{track.artist}</p>
                       </div>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center justify-between mt-3 relative z-10">
                         <button
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             onToggleLike(track.id);
                           }}
-                          className="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-zinc-700"
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onMouseUp={(e) => e.stopPropagation()}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 relative z-20 ${
+                            likedSongs.has(track.id) 
+                              ? 'bg-green-500/20 opacity-100' 
+                              : 'opacity-0 group-hover:opacity-100 hover:bg-zinc-700/50'
+                          }`}
                         >
                           <Heart 
-                            size={20} 
-                            className={`transition-colors ${likedSongs.has(track.id) ? 'fill-green-500 text-green-500' : 'text-zinc-400 hover:text-white'}`}
+                            size={18} 
+                            className={`transition-all duration-300 pointer-events-none ${
+                              likedSongs.has(track.id) 
+                                ? 'fill-green-500 text-green-500 scale-110' 
+                                : 'text-zinc-400 hover:text-white'
+                            }`}
                           />
                         </button>
                         <button
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             setShowAddToPlaylist(track);
                           }}
-                          className="opacity-0 group-hover:opacity-100 ml-auto w-8 h-8 bg-green-500 hover:bg-green-400 rounded-full flex items-center justify-center font-bold text-black transition-all shadow-lg"
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onMouseUp={(e) => e.stopPropagation()}
+                          className="opacity-0 group-hover:opacity-100 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 backdrop-blur-sm relative z-20"
+                          title="Add to playlist"
                         >
-                          +
+                          <span className="text-white font-bold text-sm pointer-events-none">+</span>
                         </button>
                       </div>
                     </div>

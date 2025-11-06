@@ -44,23 +44,36 @@ body {
   transition-duration: 150ms;
 }
 
-/* Text reveal animation - runs only once */
+/* Text reveal animation - slides in from left */
 @keyframes textReveal {
   0% {
     opacity: 0;
-    transform: translateY(20px);
-    filter: blur(10px);
+    transform: translateX(-50px);
+    filter: blur(5px);
+  }
+  60% {
+    transform: translateX(5px);
+    filter: blur(2px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
     filter: blur(0);
   }
 }
 
 .animate-text-reveal {
-  animation: textReveal 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: textReveal 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   animation-iteration-count: 1;
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+
+.animate-text-reveal-delayed {
+  animation: textReveal 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-iteration-count: 1;
+  animation-delay: 0.8s;
+  opacity: 0;
 }
 
 /* Shuffle slide-in animation */
