@@ -1,6 +1,6 @@
 // components/Dashboard.tsx
 "use client";
-import { Search, Home, Clock, Play, Plus, X, Check, Heart } from "lucide-react";
+import { Search, Home, Play, Plus, X, Check, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Track } from "@/data/tracks";
 import { searchTracks } from "@/services/musicService";
@@ -26,6 +26,14 @@ interface UserPlaylist {
   createdAt: Date;
 }
 
+interface User {
+  id: string;
+  username: string;
+  name?: string;
+  email: string;
+  likedSongs?: Track[];
+}
+
 export default function Dashboard({ 
   mood, 
   onTrackSelect, 
@@ -45,7 +53,7 @@ export default function Dashboard({
   likedSongs: Set<string>;
   likedSongsTracks: Track[];
   onToggleLike: (trackId: string) => void;
-  user: any;
+  user: User | null;
   onShowAuth: () => void;
   onLogout: () => void;
 }) {
@@ -909,7 +917,7 @@ export default function Dashboard({
                   ) : (
                     <div className="text-center py-12 text-zinc-400">
                       <Search size={64} className="mx-auto mb-4 opacity-30" />
-                      <p className="text-lg">No results found for "{searchQuery}"</p>
+                      <p className="text-lg">No results found for &quot;{searchQuery}&quot;</p>
                       <p className="text-sm mt-2">Try different keywords or check your spelling</p>
                     </div>
                   )}
