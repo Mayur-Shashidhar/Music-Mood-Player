@@ -1,5 +1,5 @@
 // API service to fetch music from backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://music-mood-player-1.onrender.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 export interface Track {
   id: string;
