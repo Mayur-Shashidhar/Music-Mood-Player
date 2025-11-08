@@ -1,5 +1,5 @@
-// API service to fetch music from backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+// API service to fetch music from Next.js API routes
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface Track {
   id: string;
